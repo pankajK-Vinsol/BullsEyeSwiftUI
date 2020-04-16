@@ -10,8 +10,11 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @State var alertIsVisible: Bool = false
-    @State var sliderValue: Double = 50.0
+    @State private var alertIsVisible = false
+    @State private var sliderValue = 50.0
+    @State private var targetValue = Int.random(in: 2...99)
+    @State private var totalScore = 0
+    @State private var roundNumber = 1
     
     var body: some View {
       VStack {
@@ -19,15 +22,15 @@ struct ContentView: View {
         
         // Target row
         HStack {
-          Text("Put the bullseye as close as you can to:")
-          Text(/*@START_MENU_TOKEN@*/"100"/*@END_MENU_TOKEN@*/)
+          Text("Put the BullsEye as close as you can to: ")
+          Text("\(targetValue)")
         }
         Spacer()
         
         // Slider row
         HStack {
           Text("1")
-          Slider(value: self.$sliderValue, in: 1...100)
+          Slider(value: $sliderValue, in: 1...100)
           Text("100")
         }
         .padding(.leading, 20)
@@ -36,28 +39,34 @@ struct ContentView: View {
         
         // Button row
         Button(action: {
-          print("Button pressed!")
-          self.alertIsVisible = true
+            self.alertIsVisible = true
         }) {
           Text(/*@START_MENU_TOKEN@*/"Hit Me!"/*@END_MENU_TOKEN@*/)
         }
         .alert(isPresented: $alertIsVisible) { () -> Alert in
-          let roundedValue: Int = Int(self.sliderValue.rounded())
-          return Alert(title: Text("Hello there!"), message: Text("The slider's value is \(roundedValue)."), dismissButton: .default(Text("Awesome!")))
+          return Alert(title: Text("\(alertTitle())"),
+                       message: Text("The slider's value is: \(roundedPointsValue()).\n Your score for this round is: \(pointsForThisRound())"),
+                       dismissButton: .default(Text("Awesome!")) {
+                        self.totalScore = self.totalScore + self.pointsForThisRound()
+                        self.roundNumber += 1
+                        self.targetValue = Int.random(in: 2...99)
+            })
         }
         Spacer()
         
         // Score row
         HStack {
-          Button(action: {}) {
+          Button(action: {
+            self.resetProgress()
+          }) {
             Text("Start Over")
           }
           Spacer()
           Text("Score:")
-          Text("999999")
+          Text("\(totalScore)")
           Spacer()
           Text("Round:")
-          Text("999")
+          Text("\(roundNumber)")
           Spacer()
           Button(action: {}) {
             Text("Info")
@@ -67,6 +76,49 @@ struct ContentView: View {
         .padding(.leading, 20)
         .padding(.trailing, 20)
       }
+    }
+    
+    private func roundedPointsValue() -> Int {
+        Int(sliderValue.rounded())
+    }
+    
+    private func amountOff() -> Int {
+      abs(targetValue - roundedPointsValue())
+    }
+    
+    private func pointsForThisRound() -> Int {
+        let maximumScore = 100
+        let difference = amountOff()
+        let bonus: Int
+        if difference == 0 {
+            bonus = 100
+        } else if difference == 1 {
+            bonus = 50
+        } else {
+            bonus = 0
+        }
+        return maximumScore - difference + bonus
+    }
+    
+    private func alertTitle() -> String {
+        let difference = amountOff()
+        let title: String
+        if difference == 0 {
+            title = "Perfect!"
+        } else if difference < 5 {
+            title = "You almost had it!"
+        } else if difference <= 10 {
+            title = "Not bad."
+        } else {
+            title = "Are you even trying?"
+        }
+        return title
+    }
+    
+    private func resetProgress() {
+        totalScore = 0
+        roundNumber = 1
+        sliderValue = 50.0
     }
 }
 

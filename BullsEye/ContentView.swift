@@ -114,7 +114,7 @@ struct ContentView: View {
                 Text("Round:").modifier(LabelStyle())
                 Text("\(roundNumber)").modifier(ValueStyle())
                 Spacer()
-                Button(action: {}) {
+                NavigationLink(destination: AboutView()) {
                     Image("InfoIcon")
                     Text("Info").modifier(ButtonSmallTextStyle())
                 }
@@ -126,6 +126,7 @@ struct ContentView: View {
         }
         .background(Image("Background"), alignment: .center)
         .accentColor(midnightBlue)
+        .navigationBarTitle("Bullseye")
     }
     
     private func roundedPointsValue() -> Int {
@@ -174,6 +175,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView().previewLayout(.fixed(width: UIScreen.main.bounds.height, height: UIScreen.main.bounds.width))
+        ContentView().previewLayout(.fixed(width: 896, height: 414))
     }
 }
